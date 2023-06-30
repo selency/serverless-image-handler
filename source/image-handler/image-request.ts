@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import S3 from "aws-sdk/clients/s3";
-import { createHmac } from "crypto";
+import {createHmac} from "crypto";
 
 import {
   ContentTypes,
@@ -16,8 +16,9 @@ import {
   RequestTypes,
   StatusCodes,
 } from "./lib";
-import { SecretProvider } from "./secret-provider";
-import { ThumborMapper } from "./thumbor-mapper";
+import {SecretProvider} from "./secret-provider";
+import {ThumborMapper} from "./thumbor-mapper";
+import * as querystring from "querystring";
 
 type OriginalImageInfo = Partial<{
   contentType: string;
@@ -30,7 +31,8 @@ type OriginalImageInfo = Partial<{
 export class ImageRequest {
   private static readonly DEFAULT_EFFORT = 4;
 
-  constructor(private readonly s3Client: S3, private readonly secretProvider: SecretProvider) {}
+  constructor(private readonly s3Client: S3, private readonly secretProvider: SecretProvider) {
+  }
 
   /**
    * Determines the output format of an image
@@ -99,13 +101,15 @@ export class ImageRequest {
 
       let imageRequestInfo: ImageRequestInfo = <ImageRequestInfo>{};
 
+      this.convertPathToBase64(event);
+
       imageRequestInfo.requestType = this.parseRequestType(event);
       imageRequestInfo.bucket = this.parseImageBucket(event, imageRequestInfo.requestType);
       imageRequestInfo.key = this.parseImageKey(event, imageRequestInfo.requestType);
       imageRequestInfo.edits = this.parseImageEdits(event, imageRequestInfo.requestType);
 
       const originalImage = await this.getOriginalImage(imageRequestInfo.bucket, imageRequestInfo.key);
-      imageRequestInfo = { ...imageRequestInfo, ...originalImage };
+      imageRequestInfo = {...imageRequestInfo, ...originalImage};
 
       imageRequestInfo.headers = this.parseImageHeaders(event, imageRequestInfo.requestType);
 
@@ -153,7 +157,7 @@ export class ImageRequest {
     try {
       const result: OriginalImageInfo = {};
 
-      const imageLocation = { Bucket: bucket, Key: key };
+      const imageLocation = {Bucket: bucket, Key: key};
       const originalImage = await this.s3Client.getObject(imageLocation).promise();
       const imageBuffer = Buffer.from(originalImage.Body as Uint8Array);
 
@@ -268,15 +272,15 @@ export class ImageRequest {
   public parseImageKey(event: ImageHandlerEvent, requestType: RequestTypes): string {
     if (requestType === RequestTypes.DEFAULT) {
       // Decode the image request and return the image key
-      const { key } = this.decodeRequest(event);
+      const {key} = this.decodeRequest(event);
       return key;
     }
 
     if (requestType === RequestTypes.THUMBOR || requestType === RequestTypes.CUSTOM) {
-      let { path } = event;
+      let {path} = event;
 
       if (requestType === RequestTypes.CUSTOM) {
-        const { REWRITE_MATCH_PATTERN, REWRITE_SUBSTITUTION } = process.env;
+        const {REWRITE_MATCH_PATTERN, REWRITE_SUBSTITUTION} = process.env;
 
         if (typeof REWRITE_MATCH_PATTERN === "string") {
           const patternStrings = REWRITE_MATCH_PATTERN.split("/");
@@ -310,11 +314,11 @@ export class ImageRequest {
    * @returns The request type.
    */
   public parseRequestType(event: ImageHandlerEvent): RequestTypes {
-    const { path } = event;
+    const {path} = event;
     const matchDefault = /^(\/?)([0-9a-zA-Z+/]{4})*(([0-9a-zA-Z+/]{2}==)|([0-9a-zA-Z+/]{3}=))?$/;
     const matchThumbor =
       /^(\/?)((fit-in)?|(filters:.+\(.?\))?|(unsafe)?)(((.(?!(\.[^.\\/]+$)))*$)|.*(\.jpg$|\.jpeg$|.\.png$|\.webp$|\.tiff$|\.tif$|\.svg$|\.gif$))/i;
-    const { REWRITE_MATCH_PATTERN, REWRITE_SUBSTITUTION } = process.env;
+    const {REWRITE_MATCH_PATTERN, REWRITE_SUBSTITUTION} = process.env;
     const definedEnvironmentVariables =
       REWRITE_MATCH_PATTERN !== "" &&
       REWRITE_SUBSTITUTION !== "" &&
@@ -357,7 +361,7 @@ export class ImageRequest {
    */
   public parseImageHeaders(event: ImageHandlerEvent, requestType: RequestTypes): Headers {
     if (requestType === RequestTypes.DEFAULT) {
-      const { headers } = this.decodeRequest(event);
+      const {headers} = this.decodeRequest(event);
       if (headers) {
         return headers;
       }
@@ -371,7 +375,7 @@ export class ImageRequest {
    * @returns The decoded from base-64 image request.
    */
   public decodeRequest(event: ImageHandlerEvent): DefaultImageRequest {
-    const { path } = event;
+    const {path} = event;
 
     if (path) {
       const encoded = path.charAt(0) === "/" ? path.slice(1) : path;
@@ -401,7 +405,7 @@ export class ImageRequest {
    * @returns A formatted image source bucket.
    */
   public getAllowedSourceBuckets(): string[] {
-    const { SOURCE_BUCKETS } = process.env;
+    const {SOURCE_BUCKETS} = process.env;
 
     if (SOURCE_BUCKETS === undefined) {
       throw new ImageHandlerError(
@@ -421,7 +425,7 @@ export class ImageRequest {
    * @returns The output format.
    */
   public getOutputFormat(event: ImageHandlerEvent, requestType: RequestTypes = undefined): ImageFormatTypes {
-    const { AUTO_WEBP } = process.env;
+    const {AUTO_WEBP} = process.env;
 
     if (AUTO_WEBP === "Yes" && event.headers.Accept && event.headers.Accept.includes(ContentTypes.WEBP)) {
       return ImageFormatTypes.WEBP;
@@ -464,6 +468,31 @@ export class ImageRequest {
     }
   }
 
+  public convertPathToBase64(event: ImageHandlerEvent): void {
+    const bucket = this.getAllowedSourceBuckets()[0];
+    const {path} = event;
+    const pathParts = path.split("?");
+    const imgId = pathParts[0].split("/")[1];
+    const params = pathParts[1] ? querystring.parse(pathParts[1]) : {};
+
+    let imageConfig = {
+      bucket: bucket,
+      key: imgId,
+      edits: {}
+    }
+
+    const supportedParams = ['width', 'height'];
+
+    for (const param of supportedParams) {
+      if (params[param]) {
+        imageConfig.edits[param] = params[param];
+      }
+    }
+
+    event.path = Buffer.from(JSON.stringify(imageConfig)).toString("base64");
+  }
+
+
   /**
    * Validates the request's signature.
    * @param event Lambda request body.
@@ -471,11 +500,11 @@ export class ImageRequest {
    * @throws Throws the error if validation is enabled and the provided signature is invalid.
    */
   private async validateRequestSignature(event: ImageHandlerEvent): Promise<void> {
-    const { ENABLE_SIGNATURE, SECRETS_MANAGER, SECRET_KEY } = process.env;
+    const {ENABLE_SIGNATURE, SECRETS_MANAGER, SECRET_KEY} = process.env;
 
     // Checks signature enabled
     if (ENABLE_SIGNATURE === "Yes") {
-      const { path, queryStringParameters } = event;
+      const {path, queryStringParameters} = event;
 
       if (!queryStringParameters?.signature) {
         throw new ImageHandlerError(
@@ -486,7 +515,7 @@ export class ImageRequest {
       }
 
       try {
-        const { signature } = queryStringParameters;
+        const {signature} = queryStringParameters;
         const secret = JSON.parse(await this.secretProvider.getSecret(SECRETS_MANAGER));
         const key = secret[SECRET_KEY];
         const hash = createHmac("sha256", key).update(path).digest("hex");
