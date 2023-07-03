@@ -101,7 +101,11 @@ export class ImageRequest {
 
       let imageRequestInfo: ImageRequestInfo = <ImageRequestInfo>{};
 
-      this.convertPathToBase64(event);
+      const { CONVERT_PATH_TO_BASE64 } = process.env;
+
+      if (CONVERT_PATH_TO_BASE64 === "Yes") {
+        this.convertPathToBase64(event);
+      }
 
       imageRequestInfo.requestType = this.parseRequestType(event);
       imageRequestInfo.bucket = this.parseImageBucket(event, imageRequestInfo.requestType);
@@ -468,6 +472,10 @@ export class ImageRequest {
     }
   }
 
+  /**
+   * Converts the path to a base64 path (CloudImage migration).
+   * @param event
+   */
   public convertPathToBase64(event: ImageHandlerEvent): void {
     const bucket = this.getAllowedSourceBuckets()[0];
     const {path} = event;

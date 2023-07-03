@@ -100,6 +100,7 @@ export class BackEnd extends Construct {
       role: imageHandlerLambdaFunctionRole,
       environment: {
         AUTO_WEBP: props.autoWebP,
+        CONVERT_PATH_TO_BASE64: props.convertPathToBase64,
         CORS_ENABLED: props.corsEnabled,
         CORS_ORIGIN: props.corsOrigin,
         SOURCE_BUCKETS: props.sourceBuckets,

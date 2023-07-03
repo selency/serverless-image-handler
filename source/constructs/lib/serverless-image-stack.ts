@@ -23,6 +23,13 @@ export class ServerlessImageHandlerStack extends Stack {
   constructor(scope: Construct, id: string, props: ServerlessImageHandlerStackProps) {
     super(scope, id, props);
 
+    const convertPathToBase64Parameter = new CfnParameter(this, "ConvertPathToBase64Parameter", {
+      type: "String",
+      description: "Would you like to convert the path of the image request to base64 path ? Select 'Yes' if so.",
+      allowedValues: ["Yes", "No"],
+      default: "No",
+    });
+
     const corsEnabledParameter = new CfnParameter(this, "CorsEnabledParameter", {
       type: "String",
       description: `Would you like to enable Cross-Origin Resource Sharing (CORS) for the image handler API? Select 'Yes' if so.`,
@@ -163,6 +170,7 @@ export class ServerlessImageHandlerStack extends Stack {
     const sourceCodeKeyPrefix = solutionMapping.findInMap("Config", "S3KeyPrefix");
 
     const solutionConstructProps: SolutionConstructProps = {
+      convertPathToBase64: convertPathToBase64Parameter.valueAsString as YesNo,
       corsEnabled: corsEnabledParameter.valueAsString,
       corsOrigin: corsOriginParameter.valueAsString,
       sourceBuckets: sourceBucketsParameter.valueAsString,
@@ -284,6 +292,7 @@ export class ServerlessImageHandlerStack extends Stack {
           },
         ],
         ParameterLabels: {
+          [convertPathToBase64Parameter.logicalId]: { default: "Convert Path to Base64" },
           [corsEnabledParameter.logicalId]: { default: "CORS Enabled" },
           [corsOriginParameter.logicalId]: { default: "CORS Origin" },
           [sourceBucketsParameter.logicalId]: { default: "Source Buckets" },

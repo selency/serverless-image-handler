@@ -4,6 +4,7 @@
 export type YesNo = "Yes" | "No";
 
 export interface SolutionConstructProps {
+  readonly convertPathToBase64: YesNo;
   readonly corsEnabled: string;
   readonly corsOrigin: string;
   readonly sourceBuckets: string;

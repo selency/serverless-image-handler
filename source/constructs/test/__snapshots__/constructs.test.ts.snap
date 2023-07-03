@@ -109,6 +109,15 @@ exports[`Serverless Image Handler Stack Snapshot 1`] = `
         "CloudFrontPriceClassParameter": {
           "default": "CloudFront PriceClass",
         },
+        "CloudfrontCertificateArnParameter": {
+          "default": "CloudFront Certificate ARN",
+        },
+        "CloudfrontDomainNamesParameter": {
+          "default": "CloudFront Domain Names",
+        },
+        "ConvertPathToBase64Parameter": {
+          "default": "Convert Path to Base64",
+        },
         "CorsEnabledParameter": {
           "default": "CORS Enabled",
         },
@@ -231,6 +240,25 @@ exports[`Serverless Image Handler Stack Snapshot 1`] = `
       ],
       "Default": "PriceClass_All",
       "Description": "The AWS CloudFront price class to use. For more information see: https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/PriceClass.html",
+      "Type": "String",
+    },
+    "CloudfrontCertificateArnParameter": {
+      "Default": "",
+      "Description": "The ARN of the CloudFront distribution certificate.",
+      "Type": "String",
+    },
+    "CloudfrontDomainNamesParameter": {
+      "Default": "",
+      "Description": "The domain names of the CloudFront distribution. e.g. media.selency.com",
+      "Type": "CommaDelimitedList",
+    },
+    "ConvertPathToBase64Parameter": {
+      "AllowedValues": [
+        "Yes",
+        "No",
+      ],
+      "Default": "No",
+      "Description": "Would you like to convert the path of the image request to base64 path ? Select 'Yes' if so.",
       "Type": "String",
     },
     "CorsEnabledParameter": {
@@ -471,6 +499,9 @@ exports[`Serverless Image Handler Stack Snapshot 1`] = `
       },
       "Properties": {
         "DistributionConfig": {
+          "Aliases": {
+            "Ref": "CloudfrontDomainNamesParameter",
+          },
           "Comment": "Image Handler Distribution for Serverless Image Handler",
           "CustomErrorResponses": [
             {
@@ -569,6 +600,13 @@ exports[`Serverless Image Handler Stack Snapshot 1`] = `
           ],
           "PriceClass": {
             "Ref": "CloudFrontPriceClassParameter",
+          },
+          "ViewerCertificate": {
+            "AcmCertificateArn": {
+              "Ref": "CloudfrontCertificateArnParameter",
+            },
+            "MinimumProtocolVersion": "TLSv1.2_2021",
+            "SslSupportMethod": "sni-only",
           },
         },
         "Tags": [
@@ -1183,6 +1221,9 @@ exports[`Serverless Image Handler Stack Snapshot 1`] = `
           "Variables": {
             "AUTO_WEBP": {
               "Ref": "AutoWebPParameter",
+            },
+            "CONVERT_PATH_TO_BASE64": {
+              "Ref": "ConvertPathToBase64Parameter",
             },
             "CORS_ENABLED": {
               "Ref": "CorsEnabledParameter",

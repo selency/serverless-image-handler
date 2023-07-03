@@ -27,6 +27,35 @@ describe("setup", () => {
     process.env = OLD_ENV;
   });
 
+  it ("Should call convertToBase64 or not based on the CONVERT_TO_BASE64 environment variable", async () => {
+    process.env.CONVERT_PATH_TO_BASE64 = "Yes";
+    process.env.SOURCE_BUCKETS = "someBucket";
+
+    const event = {
+      path: "/something",
+    }
+
+    // Mock
+    mockAwsS3.getObject.mockImplementation(() => ({
+      promise() {
+        return Promise.resolve({ Body: Buffer.from("SampleImageContent\n") });
+      },
+    }));
+
+    const imageRequest = new ImageRequest(s3Client, secretProvider);
+    imageRequest.convertPathToBase64 = jest.fn();
+    await imageRequest.setup(event);
+
+    expect(imageRequest.convertPathToBase64).toBeCalled();
+
+    process.env.CONVERT_PATH_TO_BASE64 = "No";
+    const imageRequest2 = new ImageRequest(s3Client, secretProvider);
+    imageRequest2.convertPathToBase64 = jest.fn();
+    await imageRequest2.setup(event);
+
+    expect(imageRequest2.convertPathToBase64).not.toBeCalled();
+  });
+
   it("Should pass when a default image request is provided and populate the ImageRequest object with the proper values", async () => {
     // Arrange
     const event = {
