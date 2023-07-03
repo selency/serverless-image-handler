@@ -489,11 +489,16 @@ export class ImageRequest {
       edits: {}
     }
 
-    const supportedParams = ['width', 'height'];
+    const supportedParams = {
+      'width': 'width',
+      'height': 'height',
+      'w': 'width',
+      'h': 'height',
+    };
 
-    for (const param of supportedParams) {
+    for (const param in supportedParams) {
       if (params[param]) {
-        imageConfig.edits[param] = params[param];
+        imageConfig.edits[supportedParams[param]] = params[param];
       }
     }
 

@@ -10,9 +10,9 @@ describe('convertPathToBase64', () => {
   const secretProvider = new SecretProvider(secretsManager);
   process.env.SOURCE_BUCKETS = 'ap-selency-sih';
 
-  test('should parse URL with valid params', () => {
+  test('should parse URL with valid height and width params', () => {
     const event = {
-      path: "/IMG_ID?width=100&height=200",
+      path: "/IMG_KEY?width=100&height=200",
     };
 
     const imageRequest = new ImageRequest(s3Client, secretProvider);
@@ -22,7 +22,27 @@ describe('convertPathToBase64', () => {
 
     expect(path).toEqual({
       bucket: 'ap-selency-sih',
-      key: 'IMG_ID',
+      key: 'IMG_KEY',
+      edits: {
+        width: '100',
+        height: '200',
+      },
+    });
+  });
+
+  test('should parse URL with valid h and w params', () => {
+    const event = {
+      path: "/IMG_KEY?w=100&h=200",
+    };
+
+    const imageRequest = new ImageRequest(s3Client, secretProvider);
+    imageRequest.convertPathToBase64(event);
+
+    const path = JSON.parse(Buffer.from(event.path, 'base64').toString('utf-8'));
+
+    expect(path).toEqual({
+      bucket: 'ap-selency-sih',
+      key: 'IMG_KEY',
       edits: {
         width: '100',
         height: '200',
@@ -32,7 +52,7 @@ describe('convertPathToBase64', () => {
 
   test('should ignore unsupported params', () => {
     const event = {
-      path: "/IMG_ID?width=100&height=200&unsupported=300",
+      path: "/IMG_KEY?width=100&height=200&unsupported=300",
     };
 
     const imageRequest = new ImageRequest(s3Client, secretProvider);
@@ -42,7 +62,7 @@ describe('convertPathToBase64', () => {
 
     expect(path).toEqual({
       bucket: 'ap-selency-sih',
-      key: 'IMG_ID',
+      key: 'IMG_KEY',
       edits: {
         width: '100',
         height: '200',
@@ -52,7 +72,7 @@ describe('convertPathToBase64', () => {
 
   test('should return empty object for URL without params', () => {
     const event = {
-      path: "/IMG_ID",
+      path: "/IMG_KEY",
     };
 
     const imageRequest = new ImageRequest(s3Client, secretProvider);
@@ -62,7 +82,7 @@ describe('convertPathToBase64', () => {
 
     expect(path).toEqual({
         bucket: 'ap-selency-sih',
-        key: 'IMG_ID',
+        key: 'IMG_KEY',
         edits: {},
       },
     );
@@ -70,7 +90,7 @@ describe('convertPathToBase64', () => {
 
   test('should parse URL with additional segment and params', () => {
     const event = {
-      path: '/IMG_ID/something-i-want-to-ignore?width=300&height=200',
+      path: '/IMG_KEY/something-i-want-to-ignore?width=100&height=200',
     };
 
     const imageRequest = new ImageRequest(s3Client, secretProvider);
@@ -80,9 +100,9 @@ describe('convertPathToBase64', () => {
 
     expect(path).toEqual({
       bucket: 'ap-selency-sih',
-      key: 'IMG_ID',
+      key: 'IMG_KEY',
       edits: {
-        width: '300',
+        width: '100',
         height: '200',
       },
     });
