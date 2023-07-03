@@ -16,4 +16,6 @@ export interface SolutionConstructProps {
   readonly enableDefaultFallbackImage: YesNo;
   readonly fallbackImageS3Bucket: string;
   readonly fallbackImageS3KeyBucket: string;
+  readonly cloudfrontDomainNames: string[];
+  readonly cloudfrontCertificateArn: string;
 }

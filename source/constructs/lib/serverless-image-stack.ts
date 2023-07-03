@@ -125,6 +125,18 @@ export class ServerlessImageHandlerStack extends Stack {
       default: "",
     });
 
+    const cloudfrontDomainNamesParameter = new CfnParameter(this, "CloudfrontDomainNamesParameter", {
+      type: "CommaDelimitedList",
+      description: "The domain names of the CloudFront distribution. e.g. media.selency.com",
+      default: "",
+    });
+
+    const cloudfrontCertificateArnParameter = new CfnParameter(this, "CloudfrontCertificateArnParameter", {
+      type: "String",
+      description: "The ARN of the CloudFront distribution certificate.",
+      default: "",
+    });
+
     const cloudFrontPriceClassParameter = new CfnParameter(this, "CloudFrontPriceClassParameter", {
       type: "String",
       description:
@@ -163,6 +175,8 @@ export class ServerlessImageHandlerStack extends Stack {
       enableDefaultFallbackImage: enableDefaultFallbackImageParameter.valueAsString as YesNo,
       fallbackImageS3Bucket: fallbackImageS3BucketParameter.valueAsString,
       fallbackImageS3KeyBucket: fallbackImageS3KeyParameter.valueAsString,
+      cloudfrontDomainNames: cloudfrontDomainNamesParameter.valueAsList,
+      cloudfrontCertificateArn: cloudfrontCertificateArnParameter.valueAsString,
     };
 
     const commonResources = new CommonResources(this, "CommonResources", {
@@ -293,6 +307,12 @@ export class ServerlessImageHandlerStack extends Stack {
           },
           [fallbackImageS3KeyParameter.logicalId]: {
             default: "Fallback Image S3 Key",
+          },
+          [cloudfrontDomainNamesParameter.logicalId]: {
+            default: "CloudFront Domain Names",
+          },
+          [cloudfrontCertificateArnParameter.logicalId]: {
+            default: "CloudFront Certificate ARN",
           },
           [cloudFrontPriceClassParameter.logicalId]: {
             default: "CloudFront PriceClass",

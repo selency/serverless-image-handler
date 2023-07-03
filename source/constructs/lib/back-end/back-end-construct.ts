@@ -25,6 +25,7 @@ import { CloudFrontToApiGatewayToLambda } from "@aws-solutions-constructs/aws-cl
 
 import { addCfnSuppressRules } from "../../utils/utils";
 import { SolutionConstructProps } from "../types";
+import { Certificate } from "aws-cdk-lib/aws-certificatemanager";
 
 export interface BackEndProps extends SolutionConstructProps {
   readonly solutionVersion: string;
@@ -35,6 +36,8 @@ export interface BackEndProps extends SolutionConstructProps {
   readonly logsBucket: IBucket;
   readonly uuid: string;
   readonly cloudFrontPriceClass: string;
+  readonly cloudfrontDomainNames: string[];
+  readonly cloudfrontCertificateArn: string;
 }
 
 export class BackEnd extends Construct {
@@ -165,6 +168,13 @@ export class BackEnd extends Construct {
       enableLogging: true,
       logBucket: props.logsBucket,
       logFilePrefix: "api-cloudfront/",
+      certificate: Certificate.fromCertificateArn(
+        this,
+        'CloudFrontCertificate',
+        props.cloudfrontCertificateArn
+      ),
+      domainNames: props.cloudfrontDomainNames,
+
       errorResponses: [
         { httpStatus: 500, ttl: Duration.minutes(10) },
         { httpStatus: 501, ttl: Duration.minutes(10) },
