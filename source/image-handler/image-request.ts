@@ -479,51 +479,46 @@ export class ImageRequest {
   public convertPathToBase64(event: ImageHandlerEvent): void {
     const bucket = this.getAllowedSourceBuckets()[0];
     const { path } = event;
-    const pathParts = path.split("?");
-    const imageKey = pathParts[0].split("/")[1];
-    const params = pathParts[1] ? querystring.parse(pathParts[1]) : {};
+    const [uri, queryString] = path.split("?");
+    const params = queryString ? querystring.parse(queryString) : {};
+    const key = uri.split("/")[1];
+
+    const resizeParams = {
+      width: 'width',
+      height: 'height',
+      w: 'width',
+      h: 'height',
+    };
 
     let imageConfig = {
-      bucket: bucket,
-      key: imageKey,
+      bucket,
+      key,
       edits: {
         rotate: null
       }
     }
 
-    const supportedParams = {
-      width: 'width',
-      height: 'height',
-      w: 'width',
-      h: 'height',
-      bgColor: ''
-    };
-    const resizeParams = ['width', 'height', 'w', 'h'];
+    if (params.bgColor) {
+      // We only use #F5F5F5 color for background
+      imageConfig.edits['flatten'] = {
+        background: {
+          r: 245,
+          g: 245,
+          b: 245,
+          alpha: null
+        }
+      };
+    }
 
     let resize = false;
 
-    for (const param in supportedParams) {
+    for (const param in resizeParams) {
       if (params[param]) {
+        resize = true;
         const paramValue = params[param].toString();
-        const paramKey = supportedParams[param];
-
-        if (param === 'bgColor') {
-          // We only use #F5F5F5 color for background
-          imageConfig.edits['flatten'] = {
-            background: {
-              r: 245,
-              g: 245,
-              b: 245,
-              alpha: null
-            }
-          };
-        }
-
-        if (resizeParams.includes(param)) {
-          resize = true;
-          imageConfig.edits['resize'] = imageConfig.edits['resize'] || {};
-          imageConfig.edits['resize'][paramKey] = paramValue;
-        }
+        const paramKey = resizeParams[param];
+        imageConfig.edits['resize'] = imageConfig.edits['resize'] || {};
+        imageConfig.edits['resize'][paramKey] = paramValue;
       }
     }
 
