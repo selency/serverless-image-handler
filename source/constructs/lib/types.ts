@@ -4,6 +4,7 @@
 export type YesNo = "Yes" | "No";
 
 export interface SolutionConstructProps {
+  readonly convertPathToBase64: YesNo;
   readonly corsEnabled: string;
   readonly corsOrigin: string;
   readonly sourceBuckets: string;
@@ -16,4 +17,6 @@ export interface SolutionConstructProps {
   readonly enableDefaultFallbackImage: YesNo;
   readonly fallbackImageS3Bucket: string;
   readonly fallbackImageS3KeyBucket: string;
+  readonly cloudfrontDomainNames: string[];
+  readonly cloudfrontCertificateArn: string;
 }

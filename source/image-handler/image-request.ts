@@ -18,6 +18,7 @@ import {
 } from "./lib";
 import { SecretProvider } from "./secret-provider";
 import { ThumborMapper } from "./thumbor-mapper";
+import * as querystring from "querystring";
 
 type OriginalImageInfo = Partial<{
   contentType: string;
@@ -98,6 +99,12 @@ export class ImageRequest {
       await this.validateRequestSignature(event);
 
       let imageRequestInfo: ImageRequestInfo = <ImageRequestInfo>{};
+
+      const { CONVERT_PATH_TO_BASE64 } = process.env;
+
+      if (CONVERT_PATH_TO_BASE64 === "Yes") {
+        this.convertPathToBase64(event);
+      }
 
       imageRequestInfo.requestType = this.parseRequestType(event);
       imageRequestInfo.bucket = this.parseImageBucket(event, imageRequestInfo.requestType);
@@ -462,6 +469,65 @@ export class ImageRequest {
           "The file does not have an extension and the file type could not be inferred. Please ensure that your original image is of a supported file type (jpg, png, tiff, webp, svg). Refer to the documentation for additional guidance on forming image requests."
         );
     }
+  }
+
+  /**
+   * Converts the path to a base64 path (CloudImage migration).
+   * @param event Lambda request body
+   */
+  public convertPathToBase64(event: ImageHandlerEvent): void {
+    const bucket = this.getAllowedSourceBuckets()[0];
+    const { path } = event;
+    const [uri, queryString] = path.split("?");
+    const params = queryString ? querystring.parse(queryString) : {};
+    const key = uri.split("/")[1];
+
+    const resizeParams = {
+      width: "width",
+      height: "height",
+      w: "width",
+      h: "height",
+    };
+
+    const imageConfig = {
+      bucket,
+      key,
+      edits: {
+        rotate: null,
+        flatten: undefined,
+        resize: undefined,
+      },
+    };
+
+    if (params.bgColor) {
+      // We only use #F5F5F5 color for background
+      imageConfig.edits.flatten = {
+        background: {
+          r: 245,
+          g: 245,
+          b: 245,
+          alpha: null,
+        },
+      };
+    }
+
+    let resize = false;
+
+    for (const param in resizeParams) {
+      if (params[param]) {
+        resize = true;
+        const paramValue = params[param].toString();
+        const paramKey = resizeParams[param];
+        imageConfig.edits.resize = imageConfig.edits.resize || {};
+        imageConfig.edits.resize[paramKey] = paramValue;
+      }
+    }
+
+    if (resize) {
+      imageConfig.edits.resize.fit = "cover";
+    }
+
+    event.path = Buffer.from(JSON.stringify(imageConfig)).toString("base64");
   }
 
   /**
