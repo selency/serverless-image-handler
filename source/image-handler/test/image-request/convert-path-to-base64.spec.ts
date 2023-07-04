@@ -21,7 +21,7 @@ describe("convertPathToBase64", () => {
 
     expect(path).toEqual({
       bucket: "ap-selency-sih",
-      key: "IMG_KEY",
+      key: "default/IMG_KEY",
       edits: {
         rotate: null,
         resize: {
@@ -45,7 +45,7 @@ describe("convertPathToBase64", () => {
 
     expect(path).toEqual({
       bucket: "ap-selency-sih",
-      key: "IMG_KEY",
+      key: "default/IMG_KEY",
       edits: {
         rotate: null,
         resize: {
@@ -77,7 +77,7 @@ describe("convertPathToBase64", () => {
 
     expect(path).toEqual({
       bucket: "ap-selency-sih",
-      key: "IMG_KEY",
+      key: "default/IMG_KEY",
       edits: {
         rotate: null,
         resize: {
@@ -101,7 +101,7 @@ describe("convertPathToBase64", () => {
 
     expect(path).toEqual({
       bucket: "ap-selency-sih",
-      key: "IMG_KEY",
+      key: "default/IMG_KEY",
       edits: {
         rotate: null,
       },
@@ -120,7 +120,7 @@ describe("convertPathToBase64", () => {
 
     expect(path).toEqual({
       bucket: "ap-selency-sih",
-      key: "IMG_KEY",
+      key: "default/IMG_KEY",
       edits: {
         rotate: null,
         resize: {

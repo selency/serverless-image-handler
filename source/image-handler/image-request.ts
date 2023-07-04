@@ -480,7 +480,7 @@ export class ImageRequest {
     const { path } = event;
     const [uri, queryString] = path.split("?");
     const params = queryString ? querystring.parse(queryString) : {};
-    const key = uri.split("/")[1];
+    const key = 'default/' + uri.split("/")[1];
 
     const resizeParams = {
       width: "width",
