@@ -1,4 +1,3 @@
-import {parse} from 'url';
 import {ImageRequest} from "../../image-request";
 import S3 from "aws-sdk/clients/s3";
 import SecretsManager from "aws-sdk/clients/secretsmanager";
@@ -24,15 +23,19 @@ describe('convertPathToBase64', () => {
       bucket: 'ap-selency-sih',
       key: 'IMG_KEY',
       edits: {
-        width: '100',
-        height: '200',
+        rotate: null,
+        resize: {
+          width: '100',
+          height: '200',
+          fit: 'cover'
+        }
       },
     });
   });
 
-  test('should parse URL with valid h and w params', () => {
+  test('should parse URL with valid h, w, bgColor and translate them', () => {
     const event = {
-      path: "/IMG_KEY?w=100&h=200",
+      path: "/IMG_KEY?w=100&h=200&bgColor=F5F5F5",
     };
 
     const imageRequest = new ImageRequest(s3Client, secretProvider);
@@ -44,8 +47,20 @@ describe('convertPathToBase64', () => {
       bucket: 'ap-selency-sih',
       key: 'IMG_KEY',
       edits: {
-        width: '100',
-        height: '200',
+        rotate: null,
+        resize: {
+          width: '100',
+          height: '200',
+          fit: 'cover'
+        },
+        flatten: {
+          background: {
+            r: 245,
+            g: 245,
+            b: 245,
+            alpha: null,
+          },
+        }
       },
     });
   });
@@ -64,13 +79,17 @@ describe('convertPathToBase64', () => {
       bucket: 'ap-selency-sih',
       key: 'IMG_KEY',
       edits: {
-        width: '100',
-        height: '200',
+        rotate: null,
+        resize: {
+          width: '100',
+          height: '200',
+          fit: 'cover'
+        }
       },
     });
   });
 
-  test('should return empty object for URL without params', () => {
+  test('should return empty edits for URL without params', () => {
     const event = {
       path: "/IMG_KEY",
     };
@@ -83,7 +102,9 @@ describe('convertPathToBase64', () => {
     expect(path).toEqual({
         bucket: 'ap-selency-sih',
         key: 'IMG_KEY',
-        edits: {},
+        edits: {
+          rotate: null,
+        },
       },
     );
   });
@@ -102,8 +123,12 @@ describe('convertPathToBase64', () => {
       bucket: 'ap-selency-sih',
       key: 'IMG_KEY',
       edits: {
-        width: '100',
-        height: '200',
+        rotate: null,
+        resize: {
+          width: '100',
+          height: '200',
+          fit: 'cover'
+        }
       },
     });
   });

@@ -101,7 +101,7 @@ export class ImageRequest {
 
       let imageRequestInfo: ImageRequestInfo = <ImageRequestInfo>{};
 
-      const { CONVERT_PATH_TO_BASE64 } = process.env;
+      const {CONVERT_PATH_TO_BASE64} = process.env;
 
       if (CONVERT_PATH_TO_BASE64 === "Yes") {
         this.convertPathToBase64(event);
@@ -478,28 +478,57 @@ export class ImageRequest {
    */
   public convertPathToBase64(event: ImageHandlerEvent): void {
     const bucket = this.getAllowedSourceBuckets()[0];
-    const {path} = event;
+    const { path } = event;
     const pathParts = path.split("?");
-    const imgId = pathParts[0].split("/")[1];
+    const imageKey = pathParts[0].split("/")[1];
     const params = pathParts[1] ? querystring.parse(pathParts[1]) : {};
 
     let imageConfig = {
       bucket: bucket,
-      key: imgId,
-      edits: {}
+      key: imageKey,
+      edits: {
+        rotate: null
+      }
     }
 
     const supportedParams = {
-      'width': 'width',
-      'height': 'height',
-      'w': 'width',
-      'h': 'height',
+      width: 'width',
+      height: 'height',
+      w: 'width',
+      h: 'height',
+      bgColor: ''
     };
+    const resizeParams = ['width', 'height', 'w', 'h'];
+
+    let resize = false;
 
     for (const param in supportedParams) {
       if (params[param]) {
-        imageConfig.edits[supportedParams[param]] = params[param];
+        const paramValue = params[param].toString();
+        const paramKey = supportedParams[param];
+
+        if (param === 'bgColor') {
+          // We only use #F5F5F5 color for background
+          imageConfig.edits['flatten'] = {
+            background: {
+              r: 245,
+              g: 245,
+              b: 245,
+              alpha: null
+            }
+          };
+        }
+
+        if (resizeParams.includes(param)) {
+          resize = true;
+          imageConfig.edits['resize'] = imageConfig.edits['resize'] || {};
+          imageConfig.edits['resize'][paramKey] = paramValue;
+        }
       }
+    }
+
+    if (resize) {
+      imageConfig.edits['resize']['fit'] = 'cover';
     }
 
     event.path = Buffer.from(JSON.stringify(imageConfig)).toString("base64");
