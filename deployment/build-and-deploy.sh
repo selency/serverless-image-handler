@@ -9,3 +9,5 @@ VERSION=1.0.0
 
 aws s3 sync ./global-s3-assets s3://$BUCKET_NAME/$SOLUTION_NAME/$VERSION --acl bucket-owner-full-control
 aws s3 sync ./regional-s3-assets s3://$BUCKET_NAME/$SOLUTION_NAME/$VERSION --acl bucket-owner-full-control
+
+echo "Successfully created deployment assets for version $VERSION of solution $SOLUTION_NAME in bucket $BUCKET_NAME."

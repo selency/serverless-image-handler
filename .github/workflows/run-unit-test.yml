@@ -6,7 +6,8 @@ on:
     branches:
       - '*'
   pull_request:
-    types: [opened, edited, reopened, synchronize]
+    branches:
+      - '*'
 
 jobs:
   unittest:
