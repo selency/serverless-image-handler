@@ -27,13 +27,13 @@ describe("setup", () => {
     process.env = OLD_ENV;
   });
 
-  it ("Should call convertToBase64 or not based on the CONVERT_TO_BASE64 environment variable", async () => {
+  it("Should call convertToBase64 or not based on the CONVERT_TO_BASE64 environment variable", async () => {
     process.env.CONVERT_PATH_TO_BASE64 = "Yes";
     process.env.SOURCE_BUCKETS = "someBucket";
 
     const event = {
       path: "/something",
-    }
+    };
 
     // Mock
     mockAwsS3.getObject.mockImplementation(() => ({

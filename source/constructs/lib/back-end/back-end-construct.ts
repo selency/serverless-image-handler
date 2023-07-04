@@ -169,11 +169,7 @@ export class BackEnd extends Construct {
       enableLogging: true,
       logBucket: props.logsBucket,
       logFilePrefix: "api-cloudfront/",
-      certificate: Certificate.fromCertificateArn(
-        this,
-        'CloudFrontCertificate',
-        props.cloudfrontCertificateArn
-      ),
+      certificate: Certificate.fromCertificateArn(this, "CloudFrontCertificate", props.cloudfrontCertificateArn),
       domainNames: props.cloudfrontDomainNames,
 
       errorResponses: [
