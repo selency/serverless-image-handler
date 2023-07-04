@@ -495,7 +495,7 @@ export class ImageRequest {
       edits: {
         rotate: null,
         flatten: undefined,
-        resize: undefined
+        resize: undefined,
       },
     };
 
