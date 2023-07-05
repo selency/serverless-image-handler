@@ -18,7 +18,6 @@ import {
 } from "./lib";
 import { SecretProvider } from "./secret-provider";
 import { ThumborMapper } from "./thumbor-mapper";
-import * as querystring from "querystring";
 
 type OriginalImageInfo = Partial<{
   contentType: string;
@@ -496,6 +495,11 @@ export class ImageRequest {
         resize: undefined,
       },
     };
+
+    if (!queryStringParameters) {
+      event.path = Buffer.from(JSON.stringify(imageConfig)).toString("base64");
+      return;
+    }
 
     if (queryStringParameters.bgColor) {
       // We only use #F5F5F5 color for background

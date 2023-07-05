@@ -15,7 +15,7 @@ describe("convertPathToBase64", () => {
       queryStringParameters: {
         width: 100,
         height: 200,
-      }
+      },
     };
 
     const imageRequest = new ImageRequest(s3Client, secretProvider);
@@ -44,7 +44,7 @@ describe("convertPathToBase64", () => {
         w: 100,
         h: 200,
         bgColor: "F5F5F5",
-      }
+      },
     };
 
     const imageRequest = new ImageRequest(s3Client, secretProvider);
@@ -80,8 +80,8 @@ describe("convertPathToBase64", () => {
       queryStringParameters: {
         width: 100,
         height: 200,
-        unsupported: 300
-      }
+        unsupported: 300,
+      },
     };
 
     const imageRequest = new ImageRequest(s3Client, secretProvider);
@@ -129,7 +129,7 @@ describe("convertPathToBase64", () => {
       queryStringParameters: {
         width: 100,
         height: 200,
-      }
+      },
     };
 
     const imageRequest = new ImageRequest(s3Client, secretProvider);
