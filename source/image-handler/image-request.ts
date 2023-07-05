@@ -477,10 +477,8 @@ export class ImageRequest {
    */
   public convertPathToBase64(event: ImageHandlerEvent): void {
     const bucket = this.getAllowedSourceBuckets()[0];
-    const { path } = event;
-    const [uri, queryString] = path.split("?");
-    const params = queryString ? querystring.parse(queryString) : {};
-    const key = "default/" + uri.split("/")[1];
+    const { path, queryStringParameters } = event;
+    const key = "default/" + path.split("/")[1];
 
     const resizeParams = {
       width: "width",
@@ -499,7 +497,7 @@ export class ImageRequest {
       },
     };
 
-    if (params.bgColor) {
+    if (queryStringParameters.bgColor) {
       // We only use #F5F5F5 color for background
       imageConfig.edits.flatten = {
         background: {
@@ -514,12 +512,12 @@ export class ImageRequest {
     let resize = false;
 
     for (const param in resizeParams) {
-      if (params[param]) {
+      if (queryStringParameters[param]) {
         resize = true;
-        const paramValue = params[param].toString();
+        const paramValue = queryStringParameters[param];
         const paramKey = resizeParams[param];
         imageConfig.edits.resize = imageConfig.edits.resize || {};
-        imageConfig.edits.resize[paramKey] = Number(paramValue);
+        imageConfig.edits.resize[paramKey] = paramValue;
       }
     }
 

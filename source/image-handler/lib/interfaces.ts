@@ -9,7 +9,12 @@ import { Headers, ImageEdits } from "./types";
 export interface ImageHandlerEvent {
   path?: string;
   queryStringParameters?: {
-    signature: string;
+    signature?: string;
+    bgColor?: string;
+    height?: number;
+    width?: number;
+    h?: number;
+    w?: number;
   };
   requestContext?: {
     elb?: unknown;

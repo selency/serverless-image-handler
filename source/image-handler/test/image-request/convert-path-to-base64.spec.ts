@@ -11,7 +11,11 @@ describe("convertPathToBase64", () => {
 
   test("should parse URL with valid height and width params", () => {
     const event = {
-      path: "/IMG_KEY?width=100&height=200",
+      path: "/IMG_KEY",
+      queryStringParameters: {
+        width: 100,
+        height: 200,
+      }
     };
 
     const imageRequest = new ImageRequest(s3Client, secretProvider);
@@ -35,7 +39,12 @@ describe("convertPathToBase64", () => {
 
   test("should parse URL with valid h, w, bgColor and translate them", () => {
     const event = {
-      path: "/IMG_KEY?w=100&h=200&bgColor=F5F5F5",
+      path: "/IMG_KEY",
+      queryStringParameters: {
+        w: 100,
+        h: 200,
+        bgColor: "F5F5F5",
+      }
     };
 
     const imageRequest = new ImageRequest(s3Client, secretProvider);
@@ -67,10 +76,16 @@ describe("convertPathToBase64", () => {
 
   test("should ignore unsupported params", () => {
     const event = {
-      path: "/IMG_KEY?width=100&height=200&unsupported=300",
+      path: "/IMG_KEY",
+      queryStringParameters: {
+        width: 100,
+        height: 200,
+        unsupported: 300
+      }
     };
 
     const imageRequest = new ImageRequest(s3Client, secretProvider);
+    // @ts-ignore
     imageRequest.convertPathToBase64(event);
 
     const path = JSON.parse(Buffer.from(event.path, "base64").toString("utf-8"));
@@ -110,7 +125,11 @@ describe("convertPathToBase64", () => {
 
   test("should parse URL with additional segment and params", () => {
     const event = {
-      path: "/IMG_KEY/something-i-want-to-ignore?width=100&height=200",
+      path: "/IMG_KEY/something-i-want-to-ignore",
+      queryStringParameters: {
+        width: 100,
+        height: 200,
+      }
     };
 
     const imageRequest = new ImageRequest(s3Client, secretProvider);
