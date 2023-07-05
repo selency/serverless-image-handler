@@ -453,6 +453,11 @@ exports[`Serverless Image Handler Stack Snapshot 1`] = `
               "QueryStringBehavior": "whitelist",
               "QueryStrings": [
                 "signature",
+                "width",
+                "height",
+                "h",
+                "w",
+                "bgColor",
               ],
             },
           },
@@ -1343,6 +1348,11 @@ exports[`Serverless Image Handler Stack Snapshot 1`] = `
             "QueryStringBehavior": "whitelist",
             "QueryStrings": [
               "signature",
+              "width",
+              "height",
+              "h",
+              "w",
+              "bgColor",
             ],
           },
         },

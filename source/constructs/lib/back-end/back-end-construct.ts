@@ -24,7 +24,7 @@ import { Construct } from "constructs";
 import { CloudFrontToApiGatewayToLambda } from "@aws-solutions-constructs/aws-cloudfront-apigateway-lambda";
 
 import { addCfnSuppressRules } from "../../utils/utils";
-import { SolutionConstructProps } from "../types";
+import { SolutionConstructProps, QueryStringsWhitelist } from "../types";
 import { Certificate } from "aws-cdk-lib/aws-certificatemanager";
 
 export interface BackEndProps extends SolutionConstructProps {
@@ -134,13 +134,13 @@ export class BackEnd extends Construct {
       maxTtl: Duration.days(365),
       enableAcceptEncodingGzip: true,
       headerBehavior: CacheHeaderBehavior.allowList("origin", "accept"),
-      queryStringBehavior: CacheQueryStringBehavior.allowList("signature"),
+      queryStringBehavior: CacheQueryStringBehavior.allowList(...QueryStringsWhitelist),
     });
 
     const originRequestPolicy = new OriginRequestPolicy(this, "OriginRequestPolicy", {
       originRequestPolicyName: `ServerlessImageHandler-${props.uuid}`,
       headerBehavior: CacheHeaderBehavior.allowList("origin", "accept"),
-      queryStringBehavior: CacheQueryStringBehavior.allowList("signature"),
+      queryStringBehavior: CacheQueryStringBehavior.allowList(...QueryStringsWhitelist),
     });
 
     const apiGatewayRestApi = RestApi.fromRestApiId(

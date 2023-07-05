@@ -20,3 +20,5 @@ export interface SolutionConstructProps {
   readonly cloudfrontDomainNames: string[];
   readonly cloudfrontCertificateArn: string;
 }
+
+export const QueryStringsWhitelist: ReadonlyArray<string> = ["signature", "width", "height", "h", "w", "bgColor"];
