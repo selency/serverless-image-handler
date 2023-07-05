@@ -25,8 +25,8 @@ describe("convertPathToBase64", () => {
       edits: {
         rotate: null,
         resize: {
-          width: "100",
-          height: "200",
+          width: 100,
+          height: 200,
           fit: "cover",
         },
       },
@@ -49,8 +49,8 @@ describe("convertPathToBase64", () => {
       edits: {
         rotate: null,
         resize: {
-          width: "100",
-          height: "200",
+          width: 100,
+          height: 200,
           fit: "cover",
         },
         flatten: {
@@ -81,8 +81,8 @@ describe("convertPathToBase64", () => {
       edits: {
         rotate: null,
         resize: {
-          width: "100",
-          height: "200",
+          width: 100,
+          height: 200,
           fit: "cover",
         },
       },
@@ -124,8 +124,8 @@ describe("convertPathToBase64", () => {
       edits: {
         rotate: null,
         resize: {
-          width: "100",
-          height: "200",
+          width: 100,
+          height: 200,
           fit: "cover",
         },
       },

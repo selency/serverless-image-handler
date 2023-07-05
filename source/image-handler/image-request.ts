@@ -480,7 +480,7 @@ export class ImageRequest {
     const { path } = event;
     const [uri, queryString] = path.split("?");
     const params = queryString ? querystring.parse(queryString) : {};
-    const key = 'default/' + uri.split("/")[1];
+    const key = "default/" + uri.split("/")[1];
 
     const resizeParams = {
       width: "width",
@@ -519,7 +519,7 @@ export class ImageRequest {
         const paramValue = params[param].toString();
         const paramKey = resizeParams[param];
         imageConfig.edits.resize = imageConfig.edits.resize || {};
-        imageConfig.edits.resize[paramKey] = paramValue;
+        imageConfig.edits.resize[paramKey] = Number(paramValue);
       }
     }
 
